@@ -27,8 +27,6 @@ export default function App() {
   const [notificationTitle, setNotificationTitle] = useState('Test Notification');
   const [notificationBody, setNotificationBody] = useState('This is a test notification!');
   const [delaySeconds, setDelaySeconds] = useState('5');
-  const [serverUrl, setServerUrl] = useState('http://localhost:3000');
-  const [showServerConfig, setShowServerConfig] = useState(false);
   const [appState, setAppState] = useState(AppState.currentState);
   const notificationListener = useRef();
   const responseListener = useRef();
@@ -78,8 +76,8 @@ export default function App() {
 
     return () => {
       appStateSubscription?.remove();
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
+      Notifications.remove(notificationListener.current);
+      Notifications.remove(responseListener.current);
     };
   }, [appState]);
 
@@ -144,20 +142,19 @@ export default function App() {
       return;
     }
 
-    const endpoint = `${serverUrl}/send-notification`;
-    console.log(`🌐 Sending remote notification to: ${endpoint}`);
-
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch('https://exp.host/--/api/v2/push/send', {
         method: 'POST',
         headers: {
+          'Accept': 'application/json',
+          'Accept-encoding': 'gzip, deflate',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          pushToken: expoPushToken,
+          to: expoPushToken,
           title: notificationTitle,
           body: notificationBody,
-          data: { source: 'remote', timestamp: Date.now(), serverUrl }
+          data: { source: 'expo_api', timestamp: Date.now() }
         }),
       });
 
@@ -171,7 +168,7 @@ export default function App() {
         console.error('❌ Remote notification error:', result);
       }
     } catch (error) {
-      Alert.alert('Error', `Failed to connect to server at ${serverUrl}.\n\nMake sure the server is running and accessible.`);
+      Alert.alert('Error', 'Failed to send remote notification. Please try again.');
       console.error('❌ Remote notification error:', error);
     }
   };
@@ -309,53 +306,12 @@ export default function App() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Remote Notifications</Text>
           <Text style={styles.description}>
-            Send notifications from a server using your push token
+            Send notifications using Expo's push API directly
           </Text>
-
-          <View style={styles.serverConfigContainer}>
-            <TouchableOpacity 
-              style={styles.configToggle} 
-              onPress={() => setShowServerConfig(!showServerConfig)}
-            >
-              <Text style={styles.configToggleText}>
-                Server Config {showServerConfig ? '▼' : '▶'}
-              </Text>
-            </TouchableOpacity>
-
-            {showServerConfig && (
-              <View style={styles.configPanel}>
-                <Text style={styles.label}>Server URL:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={serverUrl}
-                  onChangeText={setServerUrl}
-                  placeholder="Enter server URL (e.g., https://abc123.ngrok.io)"
-                />
-                <View style={styles.presetButtons}>
-                  <TouchableOpacity 
-                    style={styles.presetButton} 
-                    onPress={() => setServerUrl('http://localhost:3000')}
-                  >
-                    <Text style={styles.presetButtonText}>Local</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.presetButton} 
-                    onPress={() => setServerUrl('https://your-ngrok-url.ngrok.io')}
-                  >
-                    <Text style={styles.presetButtonText}>ngrok</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
           
           <TouchableOpacity style={[styles.button, styles.remoteButton]} onPress={handleSendRemoteNotification}>
-            <Text style={styles.buttonText}>Send via Server</Text>
+            <Text style={styles.buttonText}>Send via Expo API</Text>
           </TouchableOpacity>
-
-          <Text style={styles.serverNote}>
-            Current server: {serverUrl}
-          </Text>
           
           <View style={styles.linkContainer}>
             <Text style={styles.linkTitle}>Test with Expo Push Tool:</Text>
@@ -491,13 +447,6 @@ const styles = StyleSheet.create({
   remoteButton: {
     backgroundColor: '#34C759',
   },
-  serverNote: {
-    fontSize: 11,
-    color: '#888',
-    textAlign: 'center',
-    marginTop: 5,
-    marginBottom: 15,
-  },
   linkContainer: {
     backgroundColor: '#f8f9fa',
     padding: 12,
@@ -519,45 +468,5 @@ const styles = StyleSheet.create({
   linkSubtext: {
     fontSize: 11,
     color: '#666',
-  },
-  serverConfigContainer: {
-    marginBottom: 15,
-  },
-  configToggle: {
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  configToggleText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  configPanel: {
-    backgroundColor: '#fafafa',
-    padding: 15,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginBottom: 10,
-  },
-  presetButtons: {
-    flexDirection: 'row',
-    marginTop: 10,
-    gap: 10,
-  },
-  presetButton: {
-    backgroundColor: '#e0e0e0',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    flex: 1,
-  },
-  presetButtonText: {
-    fontSize: 12,
-    color: '#333',
-    textAlign: 'center',
-    fontWeight: '500',
   },
 });
