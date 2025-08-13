@@ -60,16 +60,17 @@ For the best experience, test on a physical device as push notifications require
 ```
 NotificationDemo/
 ├── App.js                          # Main app component with UI
+├── index.js                        # Entry point
 ├── services/
 │   └── NotificationService.js      # Client-side notification utilities
-├── server/                         # Node.js backend server
-│   ├── package.json               # Server dependencies
-│   └── server.js                  # Express server with push endpoints
-├── scripts/                       # Testing and example scripts
-│   ├── send_push_notification.py  # Python script for sending notifications
-│   └── curl_examples.sh           # cURL command examples
+├── assets/                         # App icons and images
+│   ├── icon.png                   # App icon
+│   ├── adaptive-icon.png          # Android adaptive icon
+│   ├── splash-icon.png            # Splash screen image
+│   └── favicon.png                # Web favicon
 ├── package.json                   # React Native app dependencies
 ├── app.json                       # Expo configuration with project ID
+├── eas.json                       # EAS Build configuration
 └── README.md                      # Documentation
 ```
 
@@ -90,63 +91,26 @@ NotificationDemo/
 ## Technical Details
 
 - Built with Expo SDK 53
-- Uses `expo-notifications` for notification handling
-- Uses `expo-device` for device detection
+- React 19.0.0 and React Native 0.79.5
+- Uses `expo-notifications` (~0.31.4) for notification handling
+- Uses `expo-device` (~7.1.4) for device detection
+- Uses `expo-dev-client` (~5.2.4) for development
 - Supports both Android and iOS platforms
 - Implements proper notification channels for Android
 
 ## Remote Push Notifications
 
-This project includes multiple ways to test and implement remote push notifications:
+This project demonstrates how to receive remote push notifications using Expo's push notification service:
 
-### 🖥️ Method 1: Local Node.js Server
-
-#### For Local Development (WiFi allows device-to-device connections):
-1. **Start the server:**
-   ```bash
-   cd server
-   npm install
-   npm start
-   ```
-
-2. **Server will run on:** `http://localhost:3000`
-3. **In the app:** Use default server URL (`http://localhost:3000`)
-
-#### For Tunnel Mode (Managed WiFi, blocked device-to-device):
-1. **Start server with ngrok tunnel:**
-   ```bash
-   cd server
-   ./start-with-ngrok.sh
-   ```
-
-2. **Copy the ngrok URL** from the terminal output (e.g., `https://abc123.ngrok.io`)
-
-3. **In the app:** 
-   - Tap "Server Config" in Remote Notifications section
-   - Update Server URL to your ngrok URL
-   - Use "Send via Server" button
-
-#### Available endpoints:
-- `POST /send-notification` - Send single notification
-- `POST /send-batch-notifications` - Send multiple notifications  
-- `POST /check-receipts` - Check notification delivery status
-- `POST /validate-token` - Validate push token format
-- `GET /health` - Server health check
-
-### 🌐 Method 2: Expo Push Tool (Web Interface)
+### 🌐 Method 1: Expo Push Tool (Web Interface)
 
 1. Copy your push token from the app
 2. Visit: https://expo.dev/notifications
 3. Paste your token and send a test notification
 
-### 💻 Method 3: Command Line (cURL)
+### 💻 Method 2: Command Line (cURL)
 
-Run the cURL examples script:
-```bash
-./scripts/curl_examples.sh
-```
-
-Or send directly:
+Send directly:
 ```bash
 curl -H "Content-Type: application/json" -X POST "https://exp.host/--/api/v2/push/send" -d '{
   "to": "YOUR_PUSH_TOKEN_HERE",
@@ -155,22 +119,16 @@ curl -H "Content-Type: application/json" -X POST "https://exp.host/--/api/v2/pus
 }'
 ```
 
-### 🐍 Method 4: Python Script
-
-Run the Python example:
-```bash
-python3 scripts/send_push_notification.py "YOUR_PUSH_TOKEN" "Title" "Body"
-```
 
 ### 📦 Production Implementation
 
 For production use:
-- Use the server code as a starting point
 - Implement user authentication and token management
 - Add rate limiting and error handling
 - Store push tokens in a database
 - Set up monitoring and logging
 - Use environment variables for configuration
+- Build a backend service to send notifications via Expo's API
 
 ### 🔍 Error Handling
 
@@ -188,16 +146,13 @@ Common error codes:
 - **Check:** Console logs show detailed timing information
 - **Note:** Delays are capped between 1 second and 1 hour for reliability
 
-### **Issue: Remote notifications fail in tunnel mode**
-- **Cause:** Managed WiFi blocks device-to-device connections
-- **Solution 1:** Use ngrok tunnel with `./start-with-ngrok.sh`
-- **Solution 2:** Configure custom server URL in app settings
-- **Solution 3:** Use Expo Push Tool (https://expo.dev/notifications)
-- **Debug:** Check console for connection errors and URLs
+### **Issue: Remote notifications not working**
+- **Solution:** Use Expo Push Tool (https://expo.dev/notifications) to test
+- **Debug:** Check that your push token is valid and device has internet connection
+- **Alternative:** Use cURL to send notifications directly to Expo's API
 
 ### **Common Issues:**
 - **Notifications not appearing**: Ensure you're testing on a physical device
 - **Permission denied**: Check device notification settings  
 - **Token not generated**: Verify internet connection and device compatibility
-- **Server connection failed**: Check if server is running and accessible
-- **ngrok URL not working**: Ensure ngrok is installed and tunnel is active
+- **Remote notifications not received**: Verify push token is correct and try using Expo Push Tool
