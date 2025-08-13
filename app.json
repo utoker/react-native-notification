@@ -1,19 +1,30 @@
 {
   "expo": {
     "name": "NotificationDemo",
-    "slug": "NotificationDemo",
+    "slug": "notificationdemo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "projectId": "your-project-id-here",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.utoker.notificationdemo",
+      "buildNumber": "1",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification",
+          "remote-notification"
+        ],
+        "NSUserNotificationsUsageDescription": "This app uses notifications to demonstrate push notification functionality, including scheduled local notifications and remote push notifications.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,6 +35,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1168fc6b-4a4a-43b5-aab2-85a3f39898fb"
+      }
+    },
+    "owner": "utoker"
   }
 }
